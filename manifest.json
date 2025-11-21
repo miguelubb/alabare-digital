@@ -1,0 +1,29 @@
+{
+    "name": "Alabaré Multimedia",
+    "short_name": "Alabaré",
+    "description": "Cancionero Alabaré con letras, acordes y audio",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#0d6efd",
+    "orientation": "any",
+    "icons": [
+        {
+            "src": "icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "categories": [
+        "music",
+        "education"
+    ],
+    "lang": "es"
+}
