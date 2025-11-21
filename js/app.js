@@ -7,9 +7,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Check if data loaded
     if (typeof songsData === 'undefined') {
-        songListContainer.innerHTML = '<div class="p-3 text-danger">Error: No se cargaron los datos de canciones.</div>';
+        console.error('songsData is undefined');
+        songListContainer.innerHTML = '<div class="p-3 text-danger">Error: No se cargaron los datos de canciones. (songsData undefined)</div>';
         return;
     }
+
+    console.log('Loaded songsData:', songsData.length, 'categories');
+
 
     // Initial render
     renderCategories(songsData);
