@@ -1,4 +1,4 @@
-# Alabaré Multimedia - Versión Distribución
+# Alabaré Digital - Versión Distribución
 
 Esta es la versión lista para distribuir del sitio web Alabaré Multimedia, optimizada para navegadores embebidos en iPad, Android y otros dispositivos.
 

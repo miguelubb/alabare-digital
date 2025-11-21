@@ -39,20 +39,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
             item.innerHTML = `
                 <h2 class="accordion-header" id="${itemId}">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="false" aria-controls="${collapseId}">
-                        ${cat.title} <span class="badge bg-secondary ms-2 rounded-pill">${cat.songs.length}</span>
+                    <button class="accordion-button collapsed d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="false" aria-controls="${collapseId}">
+                        <span style="flex: 1;">${cat.title}</span>
+                        <span class="badge bg-secondary rounded-pill me-3">${cat.songs.length}</span>
                     </button>
                 </h2>
                 <div id="${collapseId}" class="accordion-collapse collapse" aria-labelledby="${itemId}" data-bs-parent="#songsAccordion">
                     <div class="accordion-body p-0">
                         <div class="list-group list-group-flush">
                             ${cat.songs.map(song => `
-                                <button class="list-group-item list-group-item-action ps-4 song-btn ${(!song.lyricsContent || song.lyricsContent.length < 50) ? 'text-danger' : ''}" 
+                                <button class="list-group-item list-group-item-action ps-4 song-btn d-flex justify-content-between align-items-center ${(!song.lyricsContent || song.lyricsContent.length < 50) ? 'text-danger' : ''}" 
                                     data-path="${song.path}" 
                                     data-title="${song.title}"
                                     data-index="${index}"
                                     data-song-id="${song.id}">
-                                    <i class="bi bi-music-note me-2 text-muted"></i>${song.title} [${song.id}]
+                                    <span class="song-title-text">
+                                        <i class="bi bi-music-note me-2 text-muted"></i>${song.title}
+                                    </span>
+                                    <span class="text-muted small">[${song.id}]</span>
                                 </button>
                             `).join('')}
                         </div>
@@ -104,18 +108,44 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!content) {
             mainContent.innerHTML = `
                 <div class="text-center mt-5">
-                    <h2 class="display-6">${title} [${id}]</h2>
-                    <p class="text-muted">Letra no disponible.</p>
+                    <p class="text-muted mb-2">Canción ${id}</p>
+                    <h2 class="display-6">${title}</h2>
+                    <p class="text-muted mt-3">Letra no disponible.</p>
                 </div>
             `;
             return;
         }
 
+        // Parse content to extract and remove the first title line and extract biblical reference
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(content, 'text/html');
+
+        // Remove the first title (the one in uppercase with number)
+        const firstDt = doc.querySelector('dt');
+        let biblicalRef = '';
+        if (firstDt) {
+            const titleText = firstDt.textContent || '';
+            // Check if next element is italic (biblical reference)
+            const nextElement = firstDt.nextElementSibling;
+            if (nextElement && nextElement.tagName === 'DD') {
+                const italicElement = nextElement.querySelector('i');
+                if (italicElement) {
+                    biblicalRef = italicElement.textContent.trim();
+                    nextElement.remove(); // Remove the biblical reference DD
+                }
+            }
+            firstDt.remove(); // Remove the title DT
+        }
+
+        const cleanedContent = doc.body.innerHTML;
+
         mainContent.innerHTML = `
             <div class="lyrics-container">
-                <h2 class="display-6 mb-4 text-center">${title}</h2>
+                <p class="text-center text-muted mb-2">Canción ${id}</p>
+                <h2 class="display-6 mb-2 text-center">${title}</h2>
+                ${biblicalRef ? `<p class="text-center text-muted fst-italic mb-4">${biblicalRef}</p>` : ''}
                 <div class="lyrics-content lead">
-                    ${content}
+                    ${cleanedContent}
                 </div>
             </div>
         `;

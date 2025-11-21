@@ -1,4 +1,4 @@
-# 📱 Guía de Distribución - Alabaré Multimedia PWA
+# 📱 Guía de Distribución - Alabaré Digital PWA
 
 ## 🌟 ¿Qué es una PWA?
 
