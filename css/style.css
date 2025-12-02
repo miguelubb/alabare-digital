@@ -22,6 +22,12 @@ body {
     height: 100%;
     overflow-y: auto;
     border-right: 1px solid #dee2e6;
+    transition: margin-left 0.3s ease;
+    background-color: #fff;
+}
+
+#sidebar.collapsed {
+    margin-left: -300px;
 }
 
 #mainContent {
@@ -29,8 +35,6 @@ body {
     overflow-y: auto;
     background: #f8f9fa;
     flex: 1;
-    padding-bottom: 100px;
-    /* Ensure content isn't hidden behind player */
 }
 
 /* Active song item style */
@@ -57,22 +61,20 @@ body {
     background: #aaa;
 }
 
-/* Lyrics Styling */
+/* =========================================
+   Legacy HTML Lyrics Styling
+   ========================================= */
 .lyrics-container {
     max-width: 800px;
     margin: 0 auto;
-    padding-bottom: 100px;
 }
 
 .lyrics-content {
     font-size: 1rem;
-    /* Base size, all text same size */
     line-height: 1.6;
     color: #000;
-    /* Default text color black */
     text-align: left;
     font-family: "Times New Roman", Times, serif;
-    /* Preserve original alignment */
 }
 
 .lyrics-content dl {
@@ -90,28 +92,184 @@ body {
     margin-bottom: 1rem;
 }
 
-/* Normalize all font tags to inherit size - only color distinguishes chords */
+/* Normalize all font tags to inherit size */
 .lyrics-content font {
     font-family: inherit !important;
     font-size: inherit !important;
-    /* All same size */
 }
 
-/* Specific targeting for Chords (size="1" in original HTML) - only color differs */
+/* Specific targeting for Chords (size="1" in original HTML) */
 .lyrics-content font[size="1"] {
     color: #0d6efd !important;
-    /* Blue for chords */
 }
 
-/* Specific targeting for Lyrics (size="2" in original HTML) - keep black */
+/* Specific targeting for Lyrics (size="2" in original HTML) */
 .lyrics-content font[size="2"] {
     color: #000 !important;
-    /* Black for lyrics */
 }
 
 /* Any font with color attribute blue in original */
 .lyrics-content font[color="#0000FF"],
 .lyrics-content font[color="blue"] {
     color: #0d6efd !important;
-    /* Standardize blue chords */
+}
+
+/* =========================================
+   ChordPro Rendering Styles
+   ========================================= */
+.chordpro-song {
+    font-family: "Consolas", "Monaco", "Courier New", monospace;
+    line-height: 1.6;
+    background-color: #fff;
+    padding: 1rem;
+    border-radius: 4px;
+}
+
+.song-title {
+    text-align: center;
+    margin-bottom: 0.5rem;
+    font-family: "Times New Roman", Times, serif;
+}
+
+.song-subtitle {
+    text-align: center;
+    font-size: 0.9rem;
+    font-family: "Times New Roman", Times, serif;
+}
+
+.song-metadata {
+    text-align: center;
+    margin: 1rem 0;
+    font-family: sans-serif;
+}
+
+.song-spacer {
+    height: 1rem;
+}
+
+.chord-line-container {
+    position: relative;
+    margin-bottom: 0.5rem;
+}
+
+.chords-row {
+    color: #0d6efd !important;
+    font-weight: bold;
+    height: 1.2rem;
+    white-space: pre;
+    font-family: inherit;
+}
+
+.chord {
+    display: inline-block;
+    color: #0d6efd !important;
+}
+
+.chord-spacer {
+    display: inline-block;
+}
+
+.lyrics-row {
+    white-space: pre-wrap;
+    font-family: inherit;
+}
+
+.lyrics-line {
+    margin: 0.25rem 0;
+}
+
+/* =========================================
+   UI Components (Toolbar, Comparison)
+   ========================================= */
+.toolbar {
+    background-color: #e9ecef;
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.comparison-container {
+    display: flex;
+    gap: 1rem;
+    height: 100%;
+    overflow: hidden;
+}
+
+.comparison-panel {
+    flex: 1;
+    overflow-y: auto;
+    background: #fff;
+    padding: 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+}
+
+.comparison-panel h5 {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #dee2e6;
+    margin-bottom: 1rem;
+    z-index: 10;
+    flex-shrink: 0;
+}
+
+#originalViewContainer {
+    display: none;
+}
+
+#originalViewContainer.show {
+    display: flex;
+}
+
+/* =========================================
+   CodeMirror Editor Full Height
+   ========================================= */
+#editorViewContainer:not(.d-none) {
+    display: flex !important;
+}
+
+#editorViewContainer .CodeMirror {
+    height: 100%;
+    flex: 1;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+#editorViewContainer textarea {
+    width: 100%;
+    flex: 1;
+    font-family: "Consolas", "Monaco", "Courier New", monospace;
+}
+
+/* =========================================
+   Audio Player in Toolbar
+   ========================================= */
+#audioPlayerContainer {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+#audioPlayerContainer audio {
+    height: 30px;
+}
+
+#playerTitle {
+    font-size: 0.85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+/* Fix height for song container to account for toolbar */
+#songContainer.h-100 {
+    height: 95% !important;
 }
