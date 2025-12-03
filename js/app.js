@@ -290,7 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 lyricsContainer.innerHTML = `
                     <div class="alert alert-warning">
                         <i class="bi bi-exclamation-triangle me-2"></i>
-                        No se encontró la versión ChordPro. 
+                        No se encontró la versión ChordPro: ${fileName}. 
                         <br><small>Ejecuta el script de conversión para generar este archivo.</small>
                     </div>`;
             }
