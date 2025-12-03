@@ -412,6 +412,8 @@ document.addEventListener('DOMContentLoaded', () => {
             .trim()
             .replace(/[-\s]+/g, '_')
             .toLowerCase();
+        // Capitalizar primera letra
+        title = title.charAt(0).toUpperCase() + title.slice(1);
         return `${song.id}_${title}.cho`;
     }
 
