@@ -41,6 +41,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const editorViewContainer = document.getElementById('editorViewContainer');
     const btnSaveEditor = document.getElementById('btnSaveEditor');
     let editorInstance = null;
+    let lastSavedContent = '';
+    let pendingSongChange = null;
+
+    // Unsaved Changes Modal Elements
+    const unsavedChangesModal = new bootstrap.Modal(document.getElementById('unsavedChangesModal'));
+    const btnDiscardChanges = document.getElementById('btnDiscardChanges');
+    const btnSaveChangesAndContinue = document.getElementById('btnSaveChangesAndContinue');
+
 
     // Initialize CodeMirror (lazy)
     function initEditor() {
@@ -85,28 +93,39 @@ document.addEventListener('DOMContentLoaded', () => {
             // Initialize CodeMirror if needed
             initEditor();
 
-            // Load ChordPro content
-            const fileName = generateChordProFilename(currentSong);
-            const filePath = `data/chordpro/${fileName}?v=${new Date().getTime()}`;
-
-            try {
-                const response = await fetch(filePath);
-                if (response.ok) {
-                    const content = await response.text();
-                    editorInstance.setValue(content);
-                } else {
-                    // File doesn't exist, create template
-                    editorInstance.setValue(`{title: ${currentSong.title}}\n{subtitle: ${currentSong.id}}\n\n(Escribe aquí la canción en formato ChordPro)`);
-                }
-            } catch (error) {
-                console.error('Error loading for editor:', error);
-                editorInstance.setValue(`Error: ${error.message}`);
-            }
-
-            // Refresh editor layout
-            setTimeout(() => editorInstance.refresh(), 100);
+            // Load content into editor
+            await loadEditorContent(currentSong);
         }
     });
+
+    async function loadEditorContent(song) {
+        if (!editorInstance) return;
+
+        // Load ChordPro content
+        const fileName = generateChordProFilename(song);
+        const filePath = `data/chordpro/${fileName}?v=${new Date().getTime()}`;
+
+        try {
+            const response = await fetch(filePath);
+            let content = '';
+            if (response.ok) {
+                content = await response.text();
+            } else {
+                // File doesn't exist, create template
+                content = `{title: ${song.title}}\n{subtitle: ${song.id}}\n\n(Escribe aquí la canción en formato ChordPro)`;
+            }
+            editorInstance.setValue(content);
+            lastSavedContent = editorInstance.getValue(); // Update last saved state from editor to ensure normalization
+            editorInstance.clearHistory(); // Clear undo history
+        } catch (error) {
+            console.error('Error loading for editor:', error);
+            editorInstance.setValue(`Error: ${error.message}`);
+        }
+
+        // Refresh editor layout
+        setTimeout(() => editorInstance.refresh(), 100);
+    }
+
 
     // Compare Button - Toggle Original View
     btnCompare.addEventListener('click', () => {
@@ -131,12 +150,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Save Button - Save edited ChordPro
     btnSaveEditor.addEventListener('click', async () => {
-        if (!currentSong || !editorInstance) return;
+        await saveCurrentSong();
+    });
+
+    async function saveCurrentSong() {
+        if (!currentSong || !editorInstance) return false;
 
         const content = editorInstance.getValue();
         const filename = generateChordProFilename(currentSong);
 
         try {
+            const originalBtnText = btnSaveEditor.innerHTML;
             btnSaveEditor.disabled = true;
             btnSaveEditor.innerHTML = '<i class="bi bi-hourglass-split me-1"></i> Guardando...';
 
@@ -152,6 +176,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 // Success feedback
                 btnSaveEditor.innerHTML = '<i class="bi bi-check-lg me-1"></i> Guardado';
+                lastSavedContent = content; // Update last saved content
+
                 setTimeout(() => {
                     btnSaveEditor.disabled = false;
                     btnSaveEditor.innerHTML = '<i class="bi bi-save me-1"></i> Guardar';
@@ -159,17 +185,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Update rendered view
                 lyricsContainer.innerHTML = parser.parseAndRender(content);
+                return true;
             } else {
                 const result = await response.json();
                 alert(`Error al guardar: ${result.error}`);
                 btnSaveEditor.disabled = false;
                 btnSaveEditor.innerHTML = '<i class="bi bi-save me-1"></i> Guardar';
+                return false;
             }
         } catch (error) {
             console.error('Error saving:', error);
             alert(`Error de red al guardar: ${error.message}`);
             btnSaveEditor.disabled = false;
             btnSaveEditor.innerHTML = '<i class="bi bi-save me-1"></i> Guardar';
+            return false;
+        }
+    }
+
+    // Unsaved Changes Logic
+    function hasUnsavedChanges() {
+        if (!editorInstance || editorViewContainer.classList.contains('d-none')) return false;
+        return editorInstance.getValue() !== lastSavedContent;
+    }
+
+    // Modal Actions
+    btnDiscardChanges.addEventListener('click', () => {
+        if (pendingSongChange) {
+            unsavedChangesModal.hide();
+            selectSong(pendingSongChange.song, pendingSongChange.btn);
+            pendingSongChange = null;
+        }
+    });
+
+    btnSaveChangesAndContinue.addEventListener('click', async () => {
+        if (pendingSongChange) {
+            const saved = await saveCurrentSong();
+            if (saved) {
+                unsavedChangesModal.hide();
+                selectSong(pendingSongChange.song, pendingSongChange.btn);
+                pendingSongChange = null;
+            }
         }
     });
 
@@ -234,10 +289,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 const song = category.songs.find(s => s.id === songId);
 
                 if (song) {
-                    selectSong(song, btn);
+                    attemptSongSelection(song, btn);
                 }
             });
         });
+    }
+
+    function attemptSongSelection(song, btn) {
+        if (currentSong && hasUnsavedChanges()) {
+            pendingSongChange = { song, btn };
+            unsavedChangesModal.show();
+        } else {
+            selectSong(song, btn);
+        }
     }
 
     // Select song function
@@ -272,6 +336,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Load Content
         await loadSongContent(song);
+
+        // If editor is open, update it too
+        if (!editorViewContainer.classList.contains('d-none')) {
+            initEditor();
+            await loadEditorContent(song);
+        }
     }
 
     async function loadSongContent(song) {
