@@ -410,7 +410,8 @@ document.addEventListener('DOMContentLoaded', () => {
             .replace(/Ñ/g, 'N')
             .replace(/[^\w\s-]/g, '')
             .trim()
-            .replace(/[-\s]+/g, '_');
+            .replace(/[-\s]+/g, '_')
+            .toLowerCase();
         return `${song.id}_${title}.cho`;
     }
 
