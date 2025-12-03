@@ -403,7 +403,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function generateChordProFilename(song) {
-        const title = song.title
+        let title = song.title
             .normalize("NFD")
             .replace(/[\u0300-\u036f]/g, "") // Remove diacritics (accents)
             .replace(/ñ/g, 'n')
